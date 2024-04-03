@@ -1,0 +1,8 @@
+plugin: servicenow.itsm.now
+table: cmdb_ci_server
+columns: ["name", "host_name", "fqdn", "ip_address"]
+enhanced: true
+keyed_groups:
+  - key: os
+    prefix: ''
+    separator: ''
