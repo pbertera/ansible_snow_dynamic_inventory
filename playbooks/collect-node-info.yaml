@@ -1,15 +1,15 @@
 ---
- - name: Checking inventory hosts
-   hosts: all
-   connection: local
-   gather_facts: false
-   tasks:
-     - ansible.builtin.debug:
-         var: group_names
-     - ansible.builtin.debug:
-         msg: "{{ inventory_hostname }}"
-     - debug:
-         var: hostvars[inventory_hostname]
+- name: Checking inventory hosts
+  hosts: all
+  connection: local
+  gather_facts: false
+  tasks:
+  - ansible.builtin.debug:
+      var: group_names
+  - ansible.builtin.debug:
+      msg: "{{ inventory_hostname }}"
+  - debug:
+      var: hostvars[inventory_hostname]
 
 - name: Get node facts for SNOW
   hosts: all
