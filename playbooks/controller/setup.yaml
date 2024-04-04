@@ -148,35 +148,35 @@
           question_description: Ansible controller hostname (with https://)
           variable: controller_host
           required: true
-          default: "https://localhost"
+          default: "{{ controller_host }}"
         - type: text
           question_name: Ansible controller username
           question_description: Ansible controller admin user
           variable: controller_username
           required: true
-          default: admin
+          default: "{{ controller_username }}"
         - type: password
           question_name: Ansible controller password
           question_description: Ansible controller admin password
           variable: controller_password
           required: true
-          default: admin123
+          default: "{{ controller_password }}"
         - type: text
           question_name: ServiceNow username
           variable: snow_username
           required: true
-          default: user
+          default: "{{ snow_username }}"
         - type: password
           question_name: ServiceNow password
           variable: snow_password
           required: true
-          default: admin123
+          default: "{{ snow_password }}"
         - type: text
           question_name: ServiceNow host
           question_description: ServiceNow host (with https://)
           variable: snow_host
           required: true
-          default: https://snow.test.com
+          default: "{{ snow_host }}"
         - type: text
           question_name: Git Repository
           question_description: Git Repository URL
