@@ -79,6 +79,10 @@
   - name: "Sync the project {{ project }}"
     ansible.controller.project_update:
       project: "{{ project }}"
+      controller_host: "{{ controller_host }}"
+      controller_username: "{{ controller_username }}"
+      controller_password: "{{ controller_password }}"
+      validate_certs: false
 
   - name: Add servicenow inventory
     ansible.controller.inventory:
