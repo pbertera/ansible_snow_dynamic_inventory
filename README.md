@@ -1,7 +1,3 @@
-https://access.redhat.com/solutions/6654601
-https://github.com/ansible/instruqt/blob/devel/tracks/getting-started-servicenow-automation/06-servicenow-inventory/setup-controller
-https://github.com/cloin/instruqt-snow
-
 ## Requisites
 
 You will need a Red Hat Ansible subscription and an Automation Platform already installed.
@@ -69,7 +65,8 @@ $ ansible-playbook -e controller_host="$CONTROLLER" \
                    -e snow_username="$SNOW_USER" \
                    -e snow_password="$SNOW_PASSWORD" \
                    -e snow_host="$SNOW_HOST" \
-                   -e sync_project=false playbooks/controller/setup.yaml
+                   -e sync_project=false \
+                   -e sync_inventory=false playbooks/controller/setup.yaml
 ```
 
 At the end of the playbook execution you should have in your controller:
@@ -82,3 +79,5 @@ At the end of the playbook execution you should have in your controller:
 - A dummy Job template listing all the hosts from the ServiceNow inventory
 
 The repo URL and the EE image can be customized within the job survey.
+
+The CMDB plugin integration can be configured with the `now.yaml` file, for more info please refer to the plugin documentation on the Red Hat [Automation Hub](https://console.redhat.com/ansible/automation-hub/repo/published/servicenow/itsm/docs/) or on the [upstream project](https://github.com/ansible-collections/servicenow.itsm/blob/main/docs/servicenow.itsm.now_inventory.rst)

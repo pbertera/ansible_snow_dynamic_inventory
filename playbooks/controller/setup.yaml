@@ -13,13 +13,13 @@
     snow_host: snow
     sync_project: true
     sync_inventory: true
-
-    snow_credential: ServiceNow credential
     scm_url: https://github.com/pbertera/ansible_snow_dynamic_inventory
     execution_environment_image: quay.io/pbertera/snow_ee:latest
+    snow_credential: ServiceNow credential
     execution_environment: ServiceNow EE
     snow_inventory: ServiceNow inventory
     project: ServiceNow inventory project
+
   tasks:
 
   - name: Add EE to the controller instance
@@ -123,7 +123,7 @@
       controller_password: "{{ controller_password }}"
       validate_certs: false
 
-  - name: Create the Job Template
+  - name: Create the Setup Job Template
     ansible.controller.job_template:
       name: Setup AAP ServiceNow inventory
       job_type: run
@@ -206,7 +206,7 @@
           - "true"
           default: "true"
 
-  - name: Collect nodes info
+  - name: Create the Collect nodes info Job Template
     ansible.controller.job_template:
       name: Collect nodes info
       job_type: run
@@ -222,7 +222,7 @@
       - Controller Credential
       state: present
 
-  - name: Update a single inventory source
+  - name: Update the inventory source
     inventory_source_update:
       name: "inventory-source"
       inventory: "{{ snow_inventory }}"
