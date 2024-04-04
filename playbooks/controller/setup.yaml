@@ -16,6 +16,7 @@
 
     snow_credential: ServiceNow credential
     scm_url: https://github.com/pbertera/ansible_snow_dynamic_inventory
+    execution_environment_image: quay.io/pbertera/snow_ee:latest
     execution_environment: ServiceNow EE
     snow_inventory: ServiceNow inventory
     project: ServiceNow inventory project
@@ -24,7 +25,7 @@
   - name: Add EE to the controller instance
     ansible.controller.execution_environment:
       name: "{{ execution_environment }}"
-      image: quay.io/pbertera/snow_ee:latest
+      image: "{{ execution_environment_image }}"
       controller_host: "{{ controller_host }}"
       controller_username: "{{ controller_username }}"
       controller_password: "{{ controller_password }}"
@@ -176,6 +177,18 @@
           variable: snow_host
           required: true
           default: https://snow.test.com
+        - type: text
+          question_name: Git Repository
+          question_description: Git Repository URL
+          variable: scm_url
+          required: true
+          default: "{{ scm_url }}"
+        - type: text
+          question_name: Execution Environment
+          question_description: Execution Environment Image
+          variable: execution_environment_image
+          required: true
+          default: "{{ execution_environment_image }}"
         - type: multiplechoice
           question_name: Sync the project after creation
           variable: sync_project
@@ -214,4 +227,8 @@
       name: "inventory-source"
       inventory: "{{ snow_inventory }}"
       organization: Default
+      controller_host: "{{ controller_host }}"
+      controller_username: "{{ controller_username }}"
+      controller_password: "{{ controller_password }}"
+      validate_certs: false
     when: sync_inventory | bool
