@@ -1,0 +1,164 @@
+- name: Configure Ansible Controller 
+  hosts: localhost
+  connection: local
+  collections:
+    - ansible.controller
+  vars:
+    controller_host: "https://localhost"
+    controller_username: admin
+    controller_password: ansible123!
+    snow_username: user
+    snow_password: password
+    snow_host: snow
+
+    snow_credential: ServiceNow credential
+    scm_url: https://github.com/pbertera/ansible_snow_dynamic_inventory
+    execution_environment: ServiceNow EE
+    snow_inventory: ServiceNow inventory
+    project: ServiceNow inventory project
+  tasks:
+
+  - name: Add EE to the controller instance
+    ansible.controller.execution_environment:
+      name: "{{ execution_environment }}"
+      image: quay.io/pbertera/snow_ee:latest
+      controller_host: "{{ controller_host }}"
+      controller_username: "{{ controller_username }}"
+      controller_password: "{{ controller_password }}"
+      validate_certs: false
+
+  - name: Add servicenow.itsm cerential type
+    ansible.controller.credential_type:
+      controller_host: "{{ controller_host }}"
+      controller_username: "{{ controller_username }}"
+      controller_password: "{{ controller_password }}"
+      validate_certs: false
+      name: servicenow.itsm
+      kind: cloud
+      inputs:
+        fields:
+        - id: SN_HOST
+          type: string
+          label: SNOW Instance
+        - id: SN_USERNAME
+          type: string
+          label: SNOW Username
+        - id: SN_PASSWORD
+          type: string
+          secret: true
+          label: SNOW Password
+
+  - name: Add SNow credential
+    ansible.controller.credential:
+      name: "{{ snow_credential }}"
+      organization: Default
+      credential_type: servicenow.itsm
+      controller_host: "{{ controller_host }}"
+      controller_username: "{{ controller_username }}"
+      controller_password: "{{ controller_password }}"
+      validate_certs: false
+      inputs:
+        SN_USERNAME: "{{ snow_username }}"
+        SN_PASSWORD: "{{ snow_password }}"
+        SN_HOST: "{{ snow_host }}"
+
+  - name: Add SCM project
+    ansible.controller.project:
+      name: "{{ project }}"
+      description: "Project that contains a now.yml to be sourced by an inventory"
+      organization: Default
+      state: present
+      scm_type: git
+      scm_url: "{{ scm_url }}"
+      scm_update_on_launch: true
+      controller_host: "{{ controller_host }}"
+      controller_username: "{{ controller_username }}"
+      controller_password: "{{ controller_password }}"
+      validate_certs: false
+
+  - name: "Sync the project {{ project }}"
+    ansible.controller.project_update:
+      project: "{{ project }}"
+
+  - name: Add servicenow inventory
+    ansible.controller.inventory:
+      name: "{{ snow_inventory }}"
+      description: "Servers added to ServiceNow CMDB"
+      organization: "Default"
+      state: present
+      controller_host: "{{ controller_host }}"
+      controller_username: "{{ controller_username }}"
+      controller_password: "{{ controller_password }}"
+      validate_certs: false
+
+  - name: Add an inventory source
+    ansible.controller.inventory_source:
+      name: "inventory-source"
+      description: "now.yml from project 'ServiceNow inventory project'"
+      inventory: "ServiceNow inventory"
+      credential: "{{ snow_credential }}"
+      source: scm
+      source_project: "ServiceNow inventory project"
+      source_path: now.yml
+      overwrite: true
+      update_on_launch: true
+      execution_environment: "{{ execution_environment }}"
+      organization: Default
+      controller_host: "{{ controller_host }}"
+      controller_username: "{{ controller_username }}"
+      controller_password: "{{ controller_password }}"
+      validate_certs: false
+
+  - name: Create the Job Template
+    ansible.controller.job_template:
+      name: Setup AAP ServiceNow inventory
+      job_type: run
+      organization: Default
+      controller_host: "{{ controller_host }}"
+      controller_username: "{{ controller_username }}"
+      controller_password: "{{ controller_password }}"
+      validate_certs: false
+      inventory: "{{ snow_inventory }}"
+      project: "{{ project }}"
+      playbook: playbooks/controller/setup.yaml
+      credentials:
+      - Controller Credential
+      state: present
+      survey_enabled: true
+      survey_spec:
+        spec:
+        - type: text
+          question_name: Ansible Controller Host
+          question_description: Ansible controller hostname (with https://)
+          variable: controller_host
+          required: true
+          default: "https://localhost"
+        - type: text
+          question_name: Ansible controller username
+          question_description: Ansible controller admin user
+          variable: controller_username
+          required: true
+          default: admin
+        - type: password
+          question_name: Ansible controller password
+          question_description: Ansible controller admin password
+          variable: controller_password
+          required: true
+          default: admin123
+        - type: text
+          question_name: ServiceNow username
+          variable: snow_username
+          required: true
+          default: user
+        - type: password
+          question_name: ServiceNow password
+          variable: snow_password
+          required: true
+          default: admin123
+        - type: text
+          question_name: ServiceNow host
+          question_description: ServiceNow host (with https://)
+          variable: snow_host
+          required: true
+          default: https://snow.test.com
+
