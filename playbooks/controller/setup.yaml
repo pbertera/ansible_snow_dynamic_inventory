@@ -1,6 +1,7 @@
 - name: Configure Ansible Controller 
   hosts: localhost
   connection: local
+  gather_facts: false
   collections:
     - ansible.controller
   vars:
@@ -10,6 +11,7 @@
     snow_username: user
     snow_password: password
     snow_host: snow
+    sync_project: true
 
     snow_credential: ServiceNow credential
     scm_url: https://github.com/pbertera/ansible_snow_dynamic_inventory
@@ -47,7 +49,12 @@
           type: string
           secret: true
           label: SNOW Password
-
+      injectors:
+        env:
+          SN_HOST: "{% raw %}{{ SN_HOST }}{% endraw %}"
+          SN_USERNAME: "{% raw %}{{ SN_USERNAME }}{% endraw %}"
+          SN_PASSWORD: "{% raw %}{{ SN_PASSWORD }}{% endraw %}"
+ 
   - name: Add SNow credential
     ansible.controller.credential:
       name: "{{ snow_credential }}"
@@ -65,7 +72,7 @@
   - name: Add SCM project
     ansible.controller.project:
       name: "{{ project }}"
-      description: "Project that contains a now.yml to be sourced by an inventory"
+      description: "Project that contains a now.yaml to be sourced by an inventory"
       organization: Default
       state: present
       scm_type: git
@@ -83,6 +90,7 @@
       controller_username: "{{ controller_username }}"
       controller_password: "{{ controller_password }}"
       validate_certs: false
+    when: sync_project | bool
 
   - name: Add servicenow inventory
     ansible.controller.inventory:
@@ -98,12 +106,12 @@
   - name: Add an inventory source
     ansible.controller.inventory_source:
       name: "inventory-source"
-      description: "now.yml from project 'ServiceNow inventory project'"
+      description: "now.yaml from project 'ServiceNow inventory project'"
       inventory: "ServiceNow inventory"
       credential: "{{ snow_credential }}"
       source: scm
       source_project: "ServiceNow inventory project"
-      source_path: now.yml
+      source_path: now.yaml
       overwrite: true
       update_on_launch: true
       execution_environment: "{{ execution_environment }}"
@@ -130,6 +138,8 @@
       state: present
       survey_enabled: true
       survey_spec:
+        name: AAP SNow setup survey
+        description: AAP SNow setup survey
         spec:
         - type: text
           question_name: Ansible Controller Host
@@ -165,4 +175,12 @@
           variable: snow_host
           required: true
           default: https://snow.test.com
+        - type: multiplechoice
+          question_name: Sync the project after creation
+          variable: sync_project
+          required: true
+          choices:
+          - "false"
+          - "true"
+          default: "true"
 
