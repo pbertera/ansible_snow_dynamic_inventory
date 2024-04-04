@@ -13,6 +13,7 @@
 
 - name: Get node facts for SNOW
   hosts: all
+  ignore_unreachable: true
   vars:
     node_info: []
   tasks:
