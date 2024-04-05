@@ -109,10 +109,10 @@
     ansible.controller.inventory_source:
       name: "inventory-source"
       description: "now.yaml from project 'ServiceNow inventory project'"
-      inventory: "ServiceNow inventory"
+      inventory: "{{ snow_inventory }}"
       credential: "{{ snow_credential }}"
       source: scm
-      source_project: "ServiceNow inventory project"
+      source_project: "{{ project }}"
       source_path: now.yaml
       overwrite: true
       update_on_launch: true
